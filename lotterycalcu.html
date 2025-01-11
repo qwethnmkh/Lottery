@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>3D Lottery Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a;
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #000000;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #00ff00;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    h2 {
+        font-size: 14px;
+        color: #00ff00;
+    }
+
+    input[type="number"] {
+      width: 200px;
+      height: 40px;
+      margin-bottom: 10px;
+      font-size: 25px;
+      border: 1px solid #70ff40;
+      background-color: #333333;
+      color: yellow;
+      font-weight: bold;
+      padding: 5px;
+      border-radius: 5px;
+    }
+
+    #directPrice {
+      width: 200px;
+    }
+
+    #roundPrice {
+      width: 200px;
+    }
+
+    #availablePoints {
+      font-size: 14px;
+      color: white;
+    }
+
+    button {
+      width: 100%;
+      height: 50px;
+      font-size: 18px;
+      border: 2px solid #000;
+      background: #00ff00;
+      color: #000000;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+      border-radius: 50px;
+    }
+
+    button:hover {
+      background-color: #00cc00;
+    }
+
+    .result {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+      color: #40f5ff;
+      background-color: #333333;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    /* Additional answer showing box */
+    .answer-box {
+      font-size: 16px;
+      color: #00ff00;
+      margin-top: 10px;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.4);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      position: relative;
+      background-color: #000000;
+      margin: auto;
+      padding: 0;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.4s;
+      border-radius: 10px;
+    }
+
+    .modal-content img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>3D Lottery Calculator</h1>
+    <input type="number" placeholder="Lottery Number" id="lotteryNumber">
+    <h2 id="ptinpt">Direct Price</h2>
+    <input type="number" placeholder="0.00 MMK" id="directPrice">
+    <h2 id="ptinpt">(R) 🔰</h2>
+    <input type="number" placeholder="0.00 MMK" id="roundPrice">
+    <div id="availablePoints">Available Points (AVP): <span id="available-multiplies"></span></div>
+    <div class="answer-box">Temporary Answer: <span id="additional-answer"></span></div>
+    <div class="result" id="result"></div>
+    <button id="save">Save</button>
+     <a href="plus.html" target="_blank"> <button id="show">Show</button></a>
+  </div>
+
+  <!-- Modal -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <img id="modal-image" src="IMG_20240525_091655.jpg" alt="Alert">
+    </div>
+  </div>
+
+  <script>
+    const lotteryNumberInput = document.getElementById('lotteryNumber');
+    const directPriceInput = document.getElementById('directPrice');
+    const roundPriceInput = document.getElementById('roundPrice');
+    const temporaryAnswerBox = document.getElementById('additional-answer');
+    const resultBox = document.getElementById('result');
+    const saveButton = document.getElementById('save');
+    const modal = document.getElementById('myModal');
+    const modalImage = document.getElementById('modal-image');
+
+    lotteryNumberInput.addEventListener('input', () => {
+      const inputValue = lotteryNumberInput.value;
+      if (inputValue.length > 3) {
+        lotteryNumberInput.value = inputValue.slice(0, 3);
+      }
+      if (inputValue.length === 3) {
+        directPriceInput.focus();
+      }
+      calculateResults();
+    });
+
+    directPriceInput.addEventListener('input', calculateResults);
+    roundPriceInput.addEventListener('input', calculateResults);
+
+    function calculateAVP(lotteryNumber) {
+      const uniqueDigits = new Set(lotteryNumber.split(''));
+      if (uniqueDigits.size === 3) return 6;
+      if (uniqueDigits.size === 2) return 3;
+      return 0;
+    }
+
+    function calculateResults() {
+      const lotteryNumber = lotteryNumberInput.value;
+      const avp = calculateAVP(lotteryNumber);
+      const directPrice = parseFloat(directPriceInput.value) || 0;
+      const adjustedAVP = directPrice ? avp - 1 : avp;
+      const temporaryAnswer = roundPriceInput.value ? roundPriceInput.value * adjustedAVP : 0;
+      const result = directPrice + temporaryAnswer;
+      temporaryAnswerBox.textContent = `(R): ${temporaryAnswer}`;
+      resultBox.textContent = `Result: ${result}`;
+    }
+
+    function showModal(imageSrc) {
+      modalImage.src = imageSrc;
+      modal.style.display = "flex";
+      setTimeout(() => {
+        modal.style.display = "none";
+      }, 800);
+    }
+
+    saveButton.addEventListener('click', () => {
+      const resultText = resultBox.textContent;
+      const resultNumber = parseFloat(resultText.split(': ')[1]) || 0;
+      if (resultNumber !== 0) {
+        const savedResults = JSON.parse(localStorage.getItem('3DResults')) || [];
+        savedResults.push(resultNumber);
+        localStorage.setItem('3DResults', JSON.stringify(savedResults));
+        showModal('IMG_20240525_091655.jpg');
+      } else {
+        showModal('IMG_20240525_095717.jpg');
+      }
+    });
+  </script>
+</body>
+</html>

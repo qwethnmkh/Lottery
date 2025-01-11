@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sum up your calculation results</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a;
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      background-color: #000000;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #00ff00;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      color: yellow;
+      position: relative;
+    }
+
+    #answer-box {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+      color: #40f5ff;
+      background-color: #333333;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    #sum-up, #clear-all {
+      width: 100%;
+      height: 50px;
+      font-size: 18px;
+      border: 2px solid #000;
+      background: #00ff00;
+      color: #000000;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+      border-radius: 50px;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #00cc00;
+    }
+
+    .swipe-left {
+      display: block;
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50px;
+      height: 90%;
+      background-color: #242424;
+      color: #ff407e;
+      text-align: center;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+
+    td:hover .swipe-left {
+      display: block;
+      background: #ffb355;
+    }
+
+    .space {
+      height: 50px;
+      width: auto;
+    }
+
+    #help {
+      width: 80px;
+      height: 30px;
+      background: #00ff2d;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      position: relative;
+      background-color: #000000;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.4s;
+      color: #ffffff;
+      text-align: center;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .modal-content img {
+      width: 100%;
+      border-radius: 30px;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    #confirmButton {
+      background: #ffffff;
+      border: 1px solid #ffdfd5;
+    }
+
+    .floating-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: #ff8800;
+      height: 47px;
+      border: 2px solid #202020;
+      border-radius: 100%;
+    }
+
+    #redo-button {
+      right: 80px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sum up your calculation results</h1>
+    <table id="results-table"></table>
+    <div id="answer-box"></div>
+    <button id="sum-up">Sum Up</button>
+    <button id="clear-all">Clear All</button>
+    <button id="undo-button" class="floating-btn">Undo</button>
+    <button id="redo-button" class="floating-btn" style="right: 80px;">Redo</button>
+  </div>
+  <div class="space"></div>
+  <a href="help.html" target="_blank">
+    <button id="help">⁉️Help</button>
+  </a>
+
+  <!-- Custom Alert Modal -->
+  <div id="customAlertModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p id="alertMessage"></p>
+      <button id="confirmButton">Confirm</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const resultsTable = document.getElementById('results-table');
+      const answerBox = document.getElementById('answer-box');
+      const sumUpButton = document.getElementById('sum-up');
+      const clearAllButton = document.getElementById('clear-all');
+      const customAlertModal = document.getElementById('customAlertModal');
+      const alertMessage = document.getElementById('alertMessage');
+      const closeModal = document.getElementsByClassName('close')[0];
+      const confirmButton = document.getElementById('confirmButton');
+
+      let savedResults = JSON.parse(localStorage.getItem('3DResults')) || [];
+      let history = JSON.parse(localStorage.getItem('history')) || [savedResults.slice()];
+      let currentResultIndex = JSON.parse(localStorage.getItem('currentResultIndex')) || 0;
+
+      function updateResultsTable() {
+        resultsTable.innerHTML = '';
+        savedResults.forEach((result, index) => {
+          const row = resultsTable.insertRow();
+          const cell = row.insertCell();
+          cell.textContent = result;
+          cell.dataset.id = index + 1;
+
+          const swipeLeftButton = document.createElement('div');
+          swipeLeftButton.textContent = '×';
+          swipeLeftButton.className = 'swipe-left';
+          swipeLeftButton.addEventListener('click', () => {
+            removeResult(index);
+          });
+          cell.appendChild(swipeLeftButton);
+        });
+      }
+
+      updateResultsTable();
+
+      sumUpButton.addEventListener('click', () => {
+        const allResults = Array.from(resultsTable.rows).map(row => parseFloat(row.cells[0].textContent) || 0);
+        const totalSum = allResults.reduce((sum, result) => sum + result, 0);
+        answerBox.textContent = `Total Sum: ${totalSum}`;
+      });
+
+      clearAllButton.addEventListener('click', () => {
+        showAlert("Are you sure you want to clear all results?", () => {
+          saveCurrentState();
+          localStorage.removeItem('3DResults');
+          savedResults = [];
+          updateResultsTable();
+          answerBox.textContent = '';
+        });
+      });
+
+      resultsTable.addEventListener('touchstart', e => {
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+      });
+
+      resultsTable.addEventListener('touchend', e => {
+        const touch = e.changedTouches[0];
+        const endX = touch.clientX;
+        const endY = touch.clientY;
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 100) {
+          if (deltaX < 0) {
+            const row = e.target.closest('tr');
+            if (row) {
+              const idToRemove = parseInt(row.cells[0].dataset.id) - 1;
+              removeResult(idToRemove);
+            }
+          }
+        }
+      });
+
+      document.getElementById('undo-button').addEventListener('click', undo);
+      document.getElementById('redo-button').addEventListener('click', redo);
+
+      function saveCurrentState() {
+        if (currentResultIndex < history.length - 1) {
+                   history = history.slice(0, currentResultIndex + 1);
+        }
+        history.push(savedResults.slice());
+        currentResultIndex++;
+        localStorage.setItem('history', JSON.stringify(history));
+        localStorage.setItem('currentResultIndex', JSON.stringify(currentResultIndex));
+      }
+
+      function undo() {
+        if (currentResultIndex > 0) {
+          savedResults = history[--currentResultIndex].slice();
+          updateResultsTable();
+          localStorage.setItem('3DResults', JSON.stringify(savedResults));
+          localStorage.setItem('currentResultIndex', JSON.stringify(currentResultIndex));
+        }
+      }
+
+      function redo() {
+        if (currentResultIndex < history.length - 1) {
+          savedResults = history[++currentResultIndex].slice();
+          updateResultsTable();
+          localStorage.setItem('3DResults', JSON.stringify(savedResults));
+          localStorage.setItem('currentResultIndex', JSON.stringify(currentResultIndex));
+        }
+      }
+
+      function removeResult(index) {
+        saveCurrentState();
+        savedResults.splice(index, 1);
+        localStorage.setItem('3DResults', JSON.stringify(savedResults));
+        updateResultsTable();
+      }
+
+      function showAlert(message, onConfirm) {
+        alertMessage.textContent = message;
+        customAlertModal.style.display = "flex";
+
+        confirmButton.onclick = function() {
+          customAlertModal.style.display = "none";
+          if (onConfirm) onConfirm();
+        };
+
+        closeModal.onclick = function() {
+          customAlertModal.style.display = "none";
+        };
+
+        window.onclick = function(event) {
+          if (event.target === customAlertModal) {
+            customAlertModal.style.display = "none";
+          }
+        };
+      }
+
+      // Save initial state
+      saveCurrentState();
+    });
+  </script>
+</body>
+</html>

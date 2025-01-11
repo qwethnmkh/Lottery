@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verse Quest Studio</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #040404, #232323);
+            font-family: 'Times New Roman', Times, serif;
+            color: #00d5ff;
+            margin: 0;
+            padding: 0;
+        }
+        
+        header {
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        #title {
+            color: #21d900;
+            font-size: 40px;
+            font-weight: bold;
+        }
+        
+        #ps {
+            width: 360px;
+            height: 398px;
+            position: relative; /* Add position relative for absolute positioning */
+            left: -400px; /* Initially position the image outside the viewport */
+            animation: slideIn 2s forwards; /* Animation to slide the image from left to right */
+        }
+       
+       p {
+           font-weight: bold;
+           text-align: justify;
+           width: 97%;
+       }
+       
+       .web-link {
+           display: inline-block;
+           margin-top: 20px;
+           text-decoration: none;
+       }
+       
+       .web-link button {
+           border: none;
+           background: none;
+           cursor: pointer;
+       }
+       
+       .web-link img {
+           width: 200px;
+           height: auto;
+       }
+       
+       @keyframes slideIn {
+           0% {
+               left: -400px; /* Start position */
+           }
+           100% {
+               left: 0; /* End position */
+           }
+       }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="title">TechnoSphere Labs</h1>
+        <img id="ps" src="https://i.postimg.cc/RhcdW0qK/Polish-20240427-105506442.jpg" alt="3D Lottery Calculator">
+        <p>Introducing the '3D Lottery Calculator' - your professional solution for effortless calculation. Efficiently handle heavy lists and effortlessly sum up all results with just one click. Experience the convenience and accuracy of our calculator today!</p>
+        <a href="lotterycalcu.html" class="web-link" target="_blank" rel="noopener">
+            <button>
+                <img src="https://i.postimg.cc/VL89KRFc/Polish-20240427-170612559.png" alt="Web Version">
+            </button>
+        </a>
+    
+        <a href="apk.html" class="web-link" target="_blank" rel="noopener">
+            <button>
+                <img src="https://i.postimg.cc/9fryDNcy/Polish-20240427-170504319.png" alt="APK Version">
+            </button>
+        </a>
+    </header>
+</body>
+</html>
